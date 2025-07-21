@@ -23,15 +23,16 @@ function Login() {
 
   useEffect(() => {
     if (isError) {
-      console.log('Login error:', message);
       toast.error(message);
     }
     if (isSuccess || user) {
-      console.log('Login successful');
       navigate('/');
     }
-    dispatch(reset());
-  }, [isError, isSuccess, user, message, navigate, dispatch]);
+
+    return () => {
+      dispatch(reset());
+    }
+  }, [user, navigate, isSuccess, isError, message, dispatch]);
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -42,12 +43,10 @@ function Login() {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log('Login form submitted');
     const userData = {
       email,
       password,
     };
-    console.log('Attempting to login with:', userData);
     dispatch(login(userData));
   };
 

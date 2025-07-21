@@ -1,5 +1,6 @@
 import {createSlice,createAsyncThunk} from '@reduxjs/toolkit'
 import goalService from './goalService'
+import { logout } from '../auth/authSlice'; // Import logout action
 
 
 const initialState={
@@ -34,7 +35,7 @@ export const getGoals=createAsyncThunk('goals/get',async(_,thunkAPI)=>{
 })
 
 //Delete goals
-export const DeleteGoal=createAsyncThunk('goals/delete',async(id,thunkAPI)=>{
+export const deleteGoal=createAsyncThunk('goals/delete',async(id,thunkAPI)=>{
     try{
         const token=thunkAPI.getState().auth.user.token
        
@@ -50,7 +51,13 @@ export const goalSlice=createSlice({
     name:'goal',
     initialState,
     reducers:{
-        reset:(state)=>initialState,
+        reset:(state) => {
+            state.goals = []
+            state.isLoading = false
+            state.isSuccess = false
+            state.isError = false
+            state.message = ''
+        }
     },
     extraReducers:(builder)=>{
         builder
@@ -73,26 +80,33 @@ export const goalSlice=createSlice({
         .addCase(getGoals.fulfilled,(state,action)=>{
             state.isLoading=false
             state.isSuccess=true
-            state.goals=action.payload
+            state.goals=Array.isArray(action.payload) ? action.payload : []
         })
         .addCase(getGoals.rejected,(state,action)=>{
             state.isLoading=false
             state.isError=true
             state.message=action.payload
         })
-        .addCase(deleteGoals.pending,(state)=>{
+        .addCase(deleteGoal.pending,(state)=>{
             state.isLoading=true
         })
-        .addCase(deleteGoals.fulfilled,(state,action)=>{
+        .addCase(deleteGoal.fulfilled,(state,action)=>{
             state.isLoading=false
             state.isSuccess=true
             state.goals=state.goals.filter((goal)=> goal._id !== action.payload.id)
         })
-        .addCase(deleteGoals.rejected,(state,action)=>{
+        .addCase(deleteGoal.rejected,(state,action)=>{
             state.isLoading=false
             state.isError=true
             state.message=action.payload
         })
+        .addCase(logout.fulfilled, (state) => {
+            state.goals = [];
+            state.isError = false;
+            state.isSuccess = false;
+            state.isLoading = false;
+            state.message = '';
+          });
     },
 })
 

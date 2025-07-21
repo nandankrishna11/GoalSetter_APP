@@ -7,7 +7,9 @@ function GoalItem({ goal }) {
     return (
         <div className="goal">
             <div>
-                {new Date(goal.createdAt).toLocaleString('en-US')}
+                {goal.createdAt && !isNaN(new Date(goal.createdAt))
+                  ? new Date(goal.createdAt).toLocaleString('en-US')
+                  : 'No Date'}
             </div>
             <h2>{goal.text}</h2>
             <button 

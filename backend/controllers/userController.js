@@ -12,6 +12,11 @@ const registerUser=asyncHandler(async(req,res)=>{
         throw new Error('please add all fields')
     }
 
+    if(password.length < 6){
+        res.status(400)
+        throw new Error('Password must be at least 6 characters')
+    }
+
     //check user exist
     const userExist=await User.findOne({email})
     if(userExist){

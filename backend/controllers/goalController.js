@@ -19,7 +19,8 @@ const setGoals = asyncHandler(async(req,res)=>{
         text:req.body.text,
         user:req.user.id,
     })
-    res.status(200).json(goal)
+    const fullGoal = await Goal.findById(goal._id)
+    res.status(200).json(fullGoal)
 })
 
 //put 
@@ -31,22 +32,22 @@ const updateGoals = asyncHandler(async(req,res)=>{
         throw new Error('Goal not found')
     }
 
-    if(!req.user){
-        res.status(401)
-        throw new Error('User not found')
-    
-    }
     //make sure the logged user matches the goal user
     if(goal.user.toString()!==req.user.id){
         res.status(401)
         throw new Error('You can not update a goal that is not yours')
         }
 
+   const { text } = req.body;
+   const updateData = {};
+   if (text) {
+    updateData.text = text;
+   }
 
-   const updateGoal = await Goal.findByIdAndUpdate(req.params.id,req.body,{
+   const updatedGoal = await Goal.findByIdAndUpdate(req.params.id, updateData, {
     new:true,
    }) 
-   res.status(200).json(updateGoal)
+   res.status(200).json(updatedGoal)
 })
 
 
@@ -58,19 +59,13 @@ const deleteGoals = asyncHandler(async(req,res)=>{
         res.status(400)
         throw new Error('Goal not found')
     }
-
   
-    if(!req.user){
-        res.status(401)
-        throw new Error('User not found')
-    
-    }
     //make sure the logged user matches the goal user
     if(goal.user.toString()!==req.user.id){
         res.status(401)
-        throw new Error('You can not update a goal that is not yours')
+        throw new Error('You can not delete a goal that is not yours')
         }
-    await goal.remove
+    await goal.remove()
 
 
    res.status(200).json({id:req.params.id})

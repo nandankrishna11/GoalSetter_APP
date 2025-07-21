@@ -21,23 +21,23 @@ function Register() {
   const dispatch = useDispatch();
 
   // ✅ Correct usage of useSelector (was causing ESLint error before)
-  const { user, isLoading, isError, isSuccess, message } = useSelector(
+  const { isLoading, isError, isSuccess, message } = useSelector(
     (state) => state.auth
   );
 
   useEffect(() => {
     if (isError) {
-      console.log('Registration error:', message);
       toast.error(message);
     }
 
-    if (isSuccess || user) {
-      console.log('Registration successful');
-      navigate('/');
+    if (isSuccess) {
+      navigate('/login');
     }
 
-    dispatch(reset());
-  }, [user, isError, isSuccess, message, navigate, dispatch]);
+    return () => {
+      dispatch(reset());
+    };
+  }, [isError, isSuccess, message, navigate, dispatch]);
 
   const onChange = (e) => {
     setFormData((prevState) => ({
@@ -48,10 +48,8 @@ function Register() {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted');
 
     if (password !== confirm_password) {
-      console.log('Passwords do not match');
       toast.error('Passwords do not match');
     } else {
       const userData = {
@@ -59,7 +57,6 @@ function Register() {
         email,
         password,
       };
-      console.log('Attempting to register with:', userData);
       dispatch(register(userData));
     }
   };
