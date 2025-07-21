@@ -1,5 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { FaUser } from 'react-icons/fa';
+import { register, reset } from '../features/auth/authSlice';
+
+import Spinner from '../components/Spinner';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -11,6 +17,28 @@ function Register() {
 
   const { name, email, password, confirm_password } = formData;
 
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // ✅ Correct usage of useSelector (was causing ESLint error before)
+  const { user, isLoading, isError, isSuccess, message } = useSelector(
+    (state) => state.auth
+  );
+
+  useEffect(() => {
+    if (isError) {
+      console.log('Registration error:', message);
+      toast.error(message);
+    }
+
+    if (isSuccess || user) {
+      console.log('Registration successful');
+      navigate('/');
+    }
+
+    dispatch(reset());
+  }, [user, isError, isSuccess, message, navigate, dispatch]);
+
   const onChange = (e) => {
     setFormData((prevState) => ({
       ...prevState,
@@ -20,9 +48,25 @@ function Register() {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    // You can add validation or API call here
-    console.log(formData);
+    console.log('Form submitted');
+
+    if (password !== confirm_password) {
+      console.log('Passwords do not match');
+      toast.error('Passwords do not match');
+    } else {
+      const userData = {
+        name,
+        email,
+        password,
+      };
+      console.log('Attempting to register with:', userData);
+      dispatch(register(userData));
+    }
   };
+
+  if (isLoading) {
+    return <Spinner />;
+  }
 
   return (
     <>
